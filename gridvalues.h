@@ -15,6 +15,8 @@ public:
      */
     GridValues();
 
+    GridValues(const GridValues&) = default;
+
     /*!
      * \brief Конструктор квадратной сетки со значениями
      * \param gridSide размер стороны сетки
@@ -22,6 +24,10 @@ public:
      * \param realStep реальный шаг точек сетки
      */
     GridValues(size_t gridSide, const Origin& origin, double realStep);
+
+    GridValues& operator=(const GridValues& other) = delete;
+
+    GridValues& operator=(GridValues&& other);
 
     size_t size() const;
     double realStep() const;

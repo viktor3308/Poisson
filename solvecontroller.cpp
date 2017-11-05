@@ -3,13 +3,15 @@
 #include "residual.h"
 #include "plot3d.h"
 #include "iterators.h"
+#include "cljacobiiterator.h"
 
 #include <QElapsedTimer>
 
-SolveController::SolveController(size_t gridSize, double epsilon, const FunctionalIterator iterator):
+SolveController::SolveController(size_t gridSize, double epsilon, std::unique_ptr<AbstractIterator> iterator, size_t stepIterations):
     m_gridSize(gridSize),
     m_epsilon(epsilon),
-    m_iterator(iterator)
+    m_iterator(std::move(iterator)),
+    m_stepIterations(stepIterations)
 {
 }
 
@@ -38,7 +40,7 @@ void SolveController::solve()
     do
     {
         previousEpsilon = currentEpsilon;
-        m_iterator(uValues, fValues);
+        (*m_iterator)(uValues, fValues, m_stepIterations);
         currentResidual = residual(uValues, fValues).maxAbs();
         ++iteration;
         emit solution(uValues);

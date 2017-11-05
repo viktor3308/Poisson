@@ -10,14 +10,14 @@ typedef std::function<void(GridValues&, const GridValues&)> FunctionalIterator;
 class AbstractIterator
 {
 public:
-    virtual void operator()(GridValues& uValues, const GridValues& fValues) const = 0;
+    virtual void operator()(GridValues& uValues, const GridValues& fValues, size_t iterations = 1) const = 0;
     virtual ~AbstractIterator();
 }; // class AbstractIterator
 
 class ZeidelIterator: public AbstractIterator
 {
 public:
-    virtual void operator()(GridValues& uValues, const GridValues& fValues) const;
+    virtual void operator()(GridValues& uValues, const GridValues& fValues, size_t iterations = 1) const;
 protected:
     void iterate(const GridValues& uValues, const GridValues& fValues, GridValues& result) const;
 }; // class ZeidelIterator
@@ -25,14 +25,14 @@ protected:
 class JacobiIterator: public ZeidelIterator
 {
 public:
-    virtual void operator()(GridValues& uValues, const GridValues& fValues) const;
+    virtual void operator()(GridValues& uValues, const GridValues& fValues, size_t iterations = 1) const;
 }; // class JacobiIterator
 
 class MultigridIterator: public AbstractIterator
 {
 public:
     MultigridIterator(size_t steps, const FunctionalIterator& simpleIterator = ZeidelIterator());
-    virtual void operator()(GridValues& uValues, const GridValues& fValues) const;
+    virtual void operator()(GridValues& uValues, const GridValues& fValues, size_t iterations = 1) const;
 private:
     void iterate(GridValues& uValues, const GridValues& fValues, size_t steps) const;
 

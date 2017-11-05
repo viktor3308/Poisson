@@ -26,6 +26,16 @@ GridValues::GridValues(size_t gridSide, const Origin &origin, double realStep):
     fillWithFunction(zero);
 }
 
+GridValues& GridValues::operator=(GridValues&& other)
+{
+  if(this == &other)
+      return *this;
+
+  assert(equalSizeOriginAndStep(*this, other));
+  m_values = std::move(other.m_values);
+  return *this;
+}
+
 size_t GridValues::size() const
 {
     return m_gridSide;

@@ -34,6 +34,29 @@
          </property>
         </widget>
        </item>
+       <item row="1" column="0">
+        <widget class="Power2Spinbox" name="m_gridSizeSpinBox">
+         <property name="minimum">
+          <number>16</number>
+         </property>
+         <property name="maximum">
+          <number>4096</number>
+         </property>
+         <property name="value">
+          <number>256</number>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Точность</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
        <item row="1" column="1">
         <widget class="QDoubleSpinBox" name="m_epsilonSpinBox">
          <property name="decimals">
@@ -50,30 +73,14 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>Точность</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
+       <item row="1" column="3">
+        <widget class="QComboBox" name="m_iteratorComboBox">
+         <property name="currentText">
+          <string/>
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="Power2Spinbox" name="m_gridSizeSpinBox">
-         <property name="minimum">
-          <number>16</number>
-         </property>
-         <property name="maximum">
-          <number>4096</number>
-         </property>
-         <property name="value">
-          <number>256</number>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
+       <item row="0" column="3">
         <widget class="QLabel" name="label_3">
          <property name="text">
           <string>Метод</string>
@@ -83,10 +90,32 @@
          </property>
         </widget>
        </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Итераций за шаг</string>
+         </property>
+        </widget>
+       </item>
        <item row="1" column="2">
-        <widget class="QComboBox" name="m_iteratorComboBox">
-         <property name="currentText">
-          <string/>
+        <widget class="QSpinBox" name="m_iterationsSpinBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>100000</number>
+         </property>
+         <property name="singleStep">
+          <number>1000</number>
+         </property>
+         <property name="value">
+          <number>27000</number>
          </property>
         </widget>
        </item>

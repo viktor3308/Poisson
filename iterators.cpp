@@ -2,6 +2,7 @@
 #include "residual.h"
 
 #include <assert.h>
+#include <utility>
 
 AbstractIterator::~AbstractIterator()
 {
@@ -35,15 +36,25 @@ void ZeidelIterator::iterate(const GridValues &uValues, const GridValues &fValue
     }
 }
 
-void ZeidelIterator::operator()(GridValues &uValues, const GridValues &fValues) const
+void ZeidelIterator::operator()(GridValues &uValues, const GridValues &fValues, size_t) const
 {
     iterate(uValues, fValues, uValues);
 }
 
-void JacobiIterator::operator()(GridValues &uValues, const GridValues &fValues) const
+void JacobiIterator::operator()(GridValues &uValues, const GridValues &fValues, size_t iterations) const
 {
-    const GridValues originUValues(uValues);
-    iterate(originUValues, fValues, uValues);
+    GridValues anotherUValues(uValues);
+
+    GridValues* currentInput = &uValues;
+    GridValues* currentOutput = &anotherUValues;
+
+    for(size_t iteration = 0; iteration < iterations; ++ iteration)
+    {
+        iterate(*currentInput, fValues, *currentOutput);
+        std::swap(currentInput, currentOutput);
+    }
+    if(currentInput != &uValues)
+        uValues = std::move(anotherUValues);
 }
 
 MultigridIterator::MultigridIterator(size_t steps, const FunctionalIterator &simpleIterator):
@@ -52,7 +63,7 @@ MultigridIterator::MultigridIterator(size_t steps, const FunctionalIterator &sim
 {
 }
 
-void MultigridIterator::operator()(GridValues &uValues, const GridValues &fValues) const
+void MultigridIterator::operator()(GridValues &uValues, const GridValues &fValues, size_t) const
 {
     iterate(uValues, fValues, m_steps);
 }

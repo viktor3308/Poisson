@@ -3,6 +3,7 @@
 
 #include "plot3d.h"
 #include "solvecontroller.h"
+#include "cljacobiiterator.h"
 
 #include <QtDataVisualization/Q3DSurface>
 #include <QtGui/QScreen>
@@ -31,7 +32,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->m_iteratorComboBox->insertItem(0, "Метод Якоби");
     ui->m_iteratorComboBox->insertItem(1, "Метод Гаусса-Зейделя");
     ui->m_iteratorComboBox->insertItem(2, "Многосеточный метод");
-    ui->m_iteratorComboBox->setCurrentIndex(0);
+    ui->m_iteratorComboBox->insertItem(3, "Метод Якоби OpenCL");
+    ui->m_iteratorComboBox->setCurrentIndex(3);
 
     m_log = new QTextEdit(this);
     m_log->setReadOnly(true);
@@ -48,26 +50,33 @@ MainWindow::~MainWindow()
 
 void MainWindow::onSolve()
 {
-    FunctionalIterator iterator;
+    std::unique_ptr<AbstractIterator> iterator;
     switch(ui->m_iteratorComboBox->currentIndex())
     {
     case 0:
-        iterator = JacobiIterator();
+        iterator.reset(new JacobiIterator());
         onMessage("\nРешение методом Якоби:\n");
         break;
     case 1:
-        iterator = ZeidelIterator();
+        iterator.reset(new ZeidelIterator());
         onMessage("\nРешение методом Гаусса-Зейделя:\n");
         break;
     case 2:
-        iterator = MultigridIterator(2);
+        iterator.reset(new MultigridIterator(2));
         onMessage("\nРешение многосеточным методом:\n");
+        break;
+    case 3:
+        iterator.reset(new ClJacobiIterator());
+        onMessage("\nРешение методом Якоби OpenCL:\n");
         break;
     default:
         return;
     }
 
-    SolveController* controller = new SolveController(ui->m_gridSizeSpinBox->value(), ui->m_epsilonSpinBox->value(), iterator);
+    SolveController* controller = new SolveController(ui->m_gridSizeSpinBox->value(),
+                                                      ui->m_epsilonSpinBox->value(),
+                                                      std::move(iterator),
+                                                      ui->m_iterationsSpinBox->value());
     QThread* thread = new QThread();
     controller->moveToThread(thread);
 

@@ -5,6 +5,8 @@
 #include "gridvalues.h"
 #include "iterators.h"
 
+#include <memory>
+
 class Plot3D;
 
 class SolveController: public QObject
@@ -12,7 +14,7 @@ class SolveController: public QObject
     Q_OBJECT
 
 public:
-    SolveController(size_t gridSize, double epsilon, const FunctionalIterator iterator);
+    SolveController(size_t gridSize, double epsilon, std::unique_ptr<AbstractIterator> iterator, size_t stepIterations);
 
 signals:
     /*!
@@ -44,7 +46,9 @@ public slots:
 private:
     const size_t m_gridSize;
     const double m_epsilon;
-    const FunctionalIterator m_iterator;
+    //const FunctionalIterator m_iterator;
+    const std::unique_ptr<AbstractIterator> m_iterator;
+    const size_t m_stepIterations;
 };
 
 #endif // SOLVECONTROLLER_H

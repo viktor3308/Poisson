@@ -24,6 +24,9 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+INCLUDEPATH += $$quote("C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v9.0/include")
+
+LIBS += -L$$quote("C:/Program Files/NVIDIA GPU Computing Toolkit/CUDA/v9.0/lib/x64") -lOpenCL
 
 SOURCES += \
         main.cpp \
@@ -32,7 +35,8 @@ SOURCES += \
     plot3d.cpp \
     gridvalues.cpp \
     residual.cpp \
-    iterators.cpp
+    iterators.cpp \
+    cljacobiiterator.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -41,7 +45,11 @@ HEADERS += \
     gridvalues.h \
     residual.h \
     functions.h \
-    iterators.h
+    iterators.h \
+    cljacobiiterator.h
 
 FORMS += \
         mainwindow.ui
+
+DISTFILES += \
+    JacobiKernel.cl
