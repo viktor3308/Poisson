@@ -20,7 +20,7 @@ ClJacobiIterator::ClJacobiIterator()
             try
             {
                 std::cout << "Name: " << platform.getInfo<CL_PLATFORM_NAME>();
-                std::cout << " Vendor: " << platform.getInfo<CL_PLATFORM_VENDOR>();
+                std::cout << " Vendor: " << platform.getInfo<CL_PLATFORM_VENDOR>();                
                 std::cout << std::endl;
 
                 std::vector<cl::Device> devices;
@@ -28,6 +28,8 @@ ClJacobiIterator::ClJacobiIterator()
                 m_context.reset(new cl::Context(devices));
 
                 m_CommandQueue.reset(new cl::CommandQueue(*m_context, devices[0]));
+
+                std::cout << " Local memory size: " << devices[0].getInfo<CL_DEVICE_LOCAL_MEM_SIZE>()  << std::endl;
 
                 std::ifstream sourceFile("JacobiKernel.cl");
                 std::string sourceCode(std::istreambuf_iterator<char>(sourceFile),(std::istreambuf_iterator<char>()));
@@ -77,19 +79,23 @@ void ClJacobiIterator::operator()(GridValues& uValues, const GridValues& fValues
 
         for(size_t iteration = 0; iteration < iterations; ++iteration)
         {
+            const size_t TREADS_COUNT = THREADS_STRIDE + 1 <= 1024 ? THREADS_STRIDE + 1 : 1024u;
+            //const size_t TREADS_COUNT = 128;
+
             int iArg = 0;
             m_kernel->setArg(iArg++, *currentInputBufferPointer);
             m_kernel->setArg(iArg++, clFValues);
             m_kernel->setArg(iArg++, *currentOutputBufferPointer);
+            m_kernel->setArg(iArg++, TREADS_COUNT * sizeof(double), NULL);
             m_kernel->setArg(iArg++, h2);
             m_kernel->setArg(iArg++, GRID_STRIDE);
 
             //CL_INVALID_WORK_DIMENSION
 
-            const size_t TREADS_COUNT = THREADS_STRIDE + 1 <= 256 ? THREADS_STRIDE + 1 : 256u;
-
             m_CommandQueue->enqueueNDRangeKernel(*m_kernel, cl::NullRange, cl::NDRange(THREADS_STRIDE + 1, THREADS_STRIDE), cl::NDRange(TREADS_COUNT, 1));
 
+            //m_CommandQueue->
+            //m_CommandQueue->finish();
             std::swap(currentInputBufferPointer, currentOutputBufferPointer);
         }
         m_CommandQueue->finish();

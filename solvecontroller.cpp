@@ -49,7 +49,7 @@ void SolveController::solve()
                      + " Максимальный модуль невязки: " + QString::number(currentResidual) + "\n");
         currentEpsilon = currentResidual / zeroResidual;
     }
-    while(iteration < 10000 && currentEpsilon <= previousEpsilon && currentEpsilon > m_epsilon);
+    while(iteration < 1 && currentEpsilon <= previousEpsilon && currentEpsilon > m_epsilon);
 
     emit message(QString("Время: ") + QString::number(timer.elapsed()) + "\n");
     emit finished();
