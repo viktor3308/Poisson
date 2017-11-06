@@ -13,16 +13,16 @@ ClJacobiIterator::ClJacobiIterator()
 
     for(const cl::Platform& platform : platforms)
     {
+        std::cout << "Name: " << platform.getInfo<CL_PLATFORM_NAME>();
+        std::cout << " Vendor: " << platform.getInfo<CL_PLATFORM_VENDOR>();
+        std::cout << std::endl;
         std::string platformName{platform.getInfo<CL_PLATFORM_NAME>()};
         platformName.pop_back();
         if(platformName == std::string("NVIDIA CUDA"))
+        //if(platformName == std::string("Intel(R) OpenCL"))
         {
             try
             {
-                std::cout << "Name: " << platform.getInfo<CL_PLATFORM_NAME>();
-                std::cout << " Vendor: " << platform.getInfo<CL_PLATFORM_VENDOR>();                
-                std::cout << std::endl;
-
                 std::vector<cl::Device> devices;
                 platform.getDevices(CL_DEVICE_TYPE_GPU, &devices);
                 m_context.reset(new cl::Context(devices));
@@ -38,6 +38,8 @@ ClJacobiIterator::ClJacobiIterator()
                 cl::Program program = cl::Program(*m_context, source);
                 program.build(devices);
                 m_kernel.reset(new cl::Kernel(program, "JacobiKernel"));
+
+                return;
             }
             catch(cl::Error error)
             {
@@ -79,8 +81,8 @@ void ClJacobiIterator::operator()(GridValues& uValues, const GridValues& fValues
 
         for(size_t iteration = 0; iteration < iterations; ++iteration)
         {
-            const size_t TREADS_COUNT = THREADS_STRIDE + 1 <= 1024 ? THREADS_STRIDE + 1 : 1024u;
-            //const size_t TREADS_COUNT = 128;
+            //const size_t TREADS_COUNT = THREADS_STRIDE + 1 <= 1024 ? THREADS_STRIDE + 1 : 1024u;
+            const size_t TREADS_COUNT = 256;
 
             int iArg = 0;
             m_kernel->setArg(iArg++, *currentInputBufferPointer);
@@ -92,7 +94,7 @@ void ClJacobiIterator::operator()(GridValues& uValues, const GridValues& fValues
 
             //CL_INVALID_WORK_DIMENSION
 
-            m_CommandQueue->enqueueNDRangeKernel(*m_kernel, cl::NullRange, cl::NDRange(THREADS_STRIDE + 1, THREADS_STRIDE), cl::NDRange(TREADS_COUNT, 1));
+            m_CommandQueue->enqueueNDRangeKernel(*m_kernel, cl::NullRange, cl::NDRange(THREADS_STRIDE + 1, THREADS_STRIDE + 1), cl::NDRange(16, 16));
 
             //m_CommandQueue->
             //m_CommandQueue->finish();
