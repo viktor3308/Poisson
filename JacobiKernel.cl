@@ -2,6 +2,7 @@ __kernel void JacobiKernel(
   __global const double* pOriginUMatrix,
   __global const double* pFMatrix,
   __global double* pResultUMatrix,
+  __global const double* pStaticUMatrix,
   __local double* pLocalUValues,
   double h2,
   int matrixStride)
@@ -13,16 +14,21 @@ __kernel void JacobiKernel(
     int localRow = get_local_id(1);
     int lastLocalRow = get_local_size(1) - 1;
 
-    int globalColumn = get_global_id(0);
     int lastGlobalColumnRow = matrixStride - 2;
 
-    int globalRow = get_global_id(1);
+    for(int c = 0; c < lastGlobalColumnRow; c = c + localUValuesStride)
+        for(int r = 0; r < lastGlobalColumnRow; r = r + get_local_size(1))
+        {
+
+    int globalColumn = c + localColumn;//get_global_id(0);
+
+    int globalRow = r + localRow;//get_global_id(1);
 
     if(lastLocalColumn > 0 && globalColumn == lastGlobalColumnRow - 1)
-        --lastLocalColumn;
+        lastLocalColumn = localUValuesStride - 2;
 
     if(lastLocalRow > 0 && globalRow == lastGlobalColumnRow - 1)
-        --lastLocalRow;
+        lastLocalRow = get_local_size(1) - 2;
 
     if(globalColumn < lastGlobalColumnRow && globalRow < lastGlobalColumnRow)
     {
@@ -57,6 +63,8 @@ __kernel void JacobiKernel(
           1./4. * (topUValue + leftUValue + rightUValue + bottomUValue +
                         pFMatrix[(globalRow + 1) * (matrixStride) + globalColumn + 1] * h2);
 
+        barrier(CLK_GLOBAL_MEM_FENCE);
+        }
     }
 
 //    if(globalColumn < lastGlobalColumnRow && globalRow < lastGlobalColumnRow)
@@ -77,6 +85,7 @@ __kernel void JacobiKernel(
 //          1./4. * (topUValue + leftUValue + rightUValue + bottomUValue +
 //                        pFMatrix[(globalRow + 1) * (matrixStride) + globalColumn + 1] * h2);
 
+//    }
 //    }
 
 

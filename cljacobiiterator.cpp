@@ -68,6 +68,10 @@ void ClJacobiIterator::operator()(GridValues& uValues, const GridValues& fValues
                                             (GRID_STRIDE) * (GRID_STRIDE) * sizeof(double),
                                             &(uValues.value(0,0)));
 
+        cl::Buffer clStaticUValues = cl::Buffer(*m_context, CL_MEM_READ_ONLY|CL_MEM_COPY_HOST_PTR,
+                                            (GRID_STRIDE) * (GRID_STRIDE) * sizeof(double),
+                                            &(uValues.value(0,0)));
+
         cl::Buffer* currentInputBufferPointer = &clUValues1;
         cl::Buffer* currentOutputBufferPointer = &clUValues2;
 
@@ -82,19 +86,20 @@ void ClJacobiIterator::operator()(GridValues& uValues, const GridValues& fValues
         for(size_t iteration = 0; iteration < iterations; ++iteration)
         {
             //const size_t TREADS_COUNT = THREADS_STRIDE + 1 <= 1024 ? THREADS_STRIDE + 1 : 1024u;
-            const size_t TREADS_COUNT = 256;
+            const size_t TREADS_COUNT = 512;
 
             int iArg = 0;
             m_kernel->setArg(iArg++, *currentInputBufferPointer);
             m_kernel->setArg(iArg++, clFValues);
             m_kernel->setArg(iArg++, *currentOutputBufferPointer);
+            m_kernel->setArg(iArg++, clStaticUValues);
             m_kernel->setArg(iArg++, TREADS_COUNT * sizeof(double), NULL);
             m_kernel->setArg(iArg++, h2);
             m_kernel->setArg(iArg++, GRID_STRIDE);
 
             //CL_INVALID_WORK_DIMENSION
 
-            m_CommandQueue->enqueueNDRangeKernel(*m_kernel, cl::NullRange, cl::NDRange(THREADS_STRIDE + 1, THREADS_STRIDE + 1), cl::NDRange(16, 16));
+            m_CommandQueue->enqueueNDRangeKernel(*m_kernel, cl::NullRange, cl::NDRange(16, 32), cl::NDRange(16, 32));
 
             //m_CommandQueue->
             //m_CommandQueue->finish();
